@@ -17,9 +17,13 @@
 <html class="fixedheight texroman">
 <head>
 <link rel="icon" href="favicon.ico" />
-<meta http-equiv="content-type" content="text/html; charset=utf-8" />  
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
 <title>Writing</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link href="https://fonts.googleapis.com/css2?family=STIX+Two+Text:wght@400;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=STIX+Two+Math&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap" rel="stylesheet" />
 <style type="text/css">
 @font-face { font-family: texroman; src: url(cmunrm.otf); font-weight: 400; font-style: normal; font-stretch: normal; }
 @font-face { font-family: texroman; src: url(cmunrb.otf); font-weight: 700; font-style: normal; font-stretch: normal; }
@@ -56,6 +60,8 @@ html { font-family: sans-serif; }
 #helpicon { position: absolute; bottom: 0; left: 0; margin: 5px; color: #ccc; cursor: pointer; font-family: sans-serif;  font-size: 15px; }
 #darkmodeicon { margin: 5px; color: #ccc; cursor: pointer; font-family: sans-serif; font-size: 15px; font-weight: bold; }
 #patternicon { margin: 5px; color: #ccc; cursor: pointer; font-family: sans-serif; font-size: 15px; font-weight: bold; }
+#fonticon { margin: 5px; color: #ccc; cursor: pointer; font-family: sans-serif; font-size: 15px; font-weight: bold; }
+#inputfonticon { margin: 5px; color: #ccc; cursor: pointer; font-family: sans-serif; font-size: 15px; font-weight: bold; }
 #help { display: none; position: fixed; top: 10%; height: 70%; left: 25%; max-width: 50%; overflow: hidden; background-color: white; border: 1px solid #ccc; padding: 15px 30px 20px 30px; overflow-y: auto; }
 #help pre {  word-wrap: break-word !important; white-space: pre-wrap !important; }
 #closeicon { position: fixed; top: 10%; left: 25%; margin: 5px 8px; color: #ccc; cursor: pointer; font-family: sans-serif; }
@@ -118,6 +124,14 @@ html { font-family: sans-serif; }
 <div id="closeicon" class="unselectable">X</div>
 <div id="darkmodeicon" class="unselectable">Toggle Dark Mode</div>
 <div id="patternicon" class="unselectable">Toggle Pattern On</div>
+<div id="fonticon" class="unselectable">Font: Sans</div>
+<div id="inputfonticon" class="unselectable">Input Font: Default</div>
+<div style="margin: 5px; color: #ccc; font-family: sans-serif; font-size: 15px;">
+Custom Font: <input id="customfontinput" type="text" placeholder="e.g., Open Sans" style="background: transparent; border: 1px solid #ccc; color: #ccc; padding: 2px;">
+</div>
+<div style="margin: 5px; color: #ccc; font-family: sans-serif; font-size: 15px;">
+Custom Input Font: <input id="custominputfontinput" type="text" placeholder="e.g., JetBrains Mono" style="background: transparent; border: 1px solid #ccc; color: #ccc; padding: 2px;">
+</div>
 <pre>
 <a href="https://github.com/josephernest/writing">Writing</a> is a lightweight distraction-free text editor.
 Write text on the left, and the result is displayed on the right.
@@ -133,6 +147,8 @@ CTRL + SHIFT + L: enable / disable LaTeX (i.e. math formulas)
 CTRL + SHIFT + D: toggle dark mode
 CTRL + SHIFT + P: toggle diagonal line pattern background
 CTRL + SHIFT + R: toggle roman (LaTex-like) or sans-serif font
+CTRL + SHIFT + F: cycle font (Sans, CM, STIX, Custom)
+CTRL + SHIFT + I: cycle input monospace font (Default, Roboto Mono, Fira Code, Custom)
 CTRL + SHIFT + H: show this help dialog
 
 F11: full-screen (in most browsers)
@@ -145,6 +161,11 @@ This is *italic* and this is **bold**.
 This is a [link](http://www.example.com/) and this is an ![image](imagelink.jpg).
 Write code with `...` or by adding a 4-whitespace indent to the paragraph.
 > This is a quote.
+
+Custom Fonts
+------------
+
+The custom font feature uses Google Fonts. Enter the exact font name as listed on Google Fonts (e.g., "Open Sans" or "Roboto") in the input fields above, then cycle the font options to "Custom" to apply it.
 
 LaTeX syntax
 ------------
@@ -159,6 +180,7 @@ About
 -----
 Made by <a href="https://twitter.com/JosephErnest">@JosephErnest</a>
 <a href="https://github.com/josephernest/writing">https://github.com/josephernest/writing</a>
+Enhanced with additional features by <a href="https://github.com/compliment/writing">compliment</a>
 Uses <a href="https://code.google.com/archive/p/pagedown/">Pagedown</a>, <a href="https://github.com/jmcmanus/pagedown-extra">Pagedown Extra</a>, <a href="https://www.mathjax.org/">MathJax</a>, StackOverflow's <a href="https://gist.github.com/gdalgas/a652bce3a173ddc59f66">editor</a> code and the <a href="http://cm-unicode.sourceforge.net/">Computer Modern</a> font.
 </pre>    
 </div>
@@ -169,10 +191,10 @@ togglemathjax = function(enabled) {
         if (!latexenabledonce)
         {
             MathJax.Hub.Config(
-{"HTML-CSS": { preferredFont: "TeX", availableFonts: ["STIX","TeX"], linebreaks: { automatic: true }, EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50) },
- tex2jax: { inlineMath: [ ["$", "$"], ["\\\\(","\\\\)"] ], displayMath: [ ["$$","$$"], ["\\[", "\\]"] ], processEscapes: true, ignoreClass: "tex2jax_ignore|dno" },
- TeX: {  noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } }, Macros: { href: "{}" } },
- messageStyle: "none", skipStartupTypeset: true });
+ {"HTML-CSS": { preferredFont: "STIX", availableFonts: ["STIX","TeX"], linebreaks: { automatic: true }, EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50) },
+  tex2jax: { inlineMath: [ ["$", "$"], ["\\\\(","\\\\)"] ], displayMath: [ ["$$","$$"], ["\\[", "\\]"] ], processEscapes: true, ignoreClass: "tex2jax_ignore|dno" },
+  TeX: {  noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } }, Macros: { href: "{}" } },
+  messageStyle: "none", skipStartupTypeset: true });
             mjpd1.mathjaxEditing.prepareWmdForMathJax(editor, '', [["$", "$"]]);
             latexenabledonce = true;
             if (editor.refreshPreview !== undefined)
@@ -201,6 +223,68 @@ toggledarkmode = function(enabled){
 togglepattern = function(enabled){
     $('body').toggleClass('diagonal-pattern',enabled);
     $('#patternicon').text(enabled ? 'Toggle Pattern Off' : 'Toggle Pattern On');
+}
+
+togglefont = function(){
+    fontmode = (fontmode + 1) % 4;
+    localStorage.setItem("fontmode", fontmode);
+    if (fontmode == 0) {
+        $('html').removeClass('texroman').css('font-family', 'sans-serif');
+        $('#fonticon').text('Font: Sans');
+    } else if (fontmode == 1) {
+        $('html').addClass('texroman').css('font-family', 'texroman');
+        $('#fonticon').text('Font: CM');
+    } else if (fontmode == 2) {
+        $('html').removeClass('texroman').css('font-family', '"STIX Two Text"');
+        $('#fonticon').text('Font: STIX');
+    } else if (fontmode == 3) {
+        var name = $('#customfontinput').val().trim();
+        if (name) {
+            if (name !== customfont) {
+                $('head').append('<link href="https://fonts.googleapis.com/css2?family=' + encodeURIComponent(name) + '&display=swap" rel="stylesheet">');
+                customfont = name;
+                localStorage.setItem("customfont", customfont);
+            }
+            $('html').removeClass('texroman').css('font-family', '"' + customfont + '"');
+            $('#fonticon').text('Font: ' + customfont);
+        } else {
+            fontmode = 0;
+            localStorage.setItem("fontmode", fontmode);
+            $('html').removeClass('texroman').css('font-family', 'sans-serif');
+            $('#fonticon').text('Font: Sans');
+        }
+    }
+}
+
+toggleinputfont = function(){
+    inputfontmode = (inputfontmode + 1) % 4;
+    localStorage.setItem("inputfontmode", inputfontmode);
+    if (inputfontmode == 0) {
+        $('#wmd-input').css('font-family', 'Consolas,Menlo,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New,monospace,sans-serif');
+        $('#inputfonticon').text('Input Font: Default');
+    } else if (inputfontmode == 1) {
+        $('#wmd-input').css('font-family', '"Roboto Mono", Consolas,Menlo,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New,monospace,sans-serif');
+        $('#inputfonticon').text('Input Font: Roboto Mono');
+    } else if (inputfontmode == 2) {
+        $('#wmd-input').css('font-family', '"Fira Code", Consolas,Menlo,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New,monospace,sans-serif');
+        $('#inputfonticon').text('Input Font: Fira Code');
+    } else if (inputfontmode == 3) {
+        var name = $('#custominputfontinput').val().trim();
+        if (name) {
+            if (name !== custominputfont) {
+                $('head').append('<link href="https://fonts.googleapis.com/css2?family=' + encodeURIComponent(custominputfont) + '&display=swap" rel="stylesheet">');
+                custominputfont = name;
+                localStorage.setItem("custominputfont", custominputfont);
+            }
+            $('#wmd-input').css('font-family', '"' + custominputfont + '", Consolas,Menlo,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New,monospace,sans-serif');
+            $('#inputfonticon').text('Input Font: ' + custominputfont);
+        } else {
+            inputfontmode = 0;
+            localStorage.setItem("inputfontmode", inputfontmode);
+            $('#wmd-input').css('font-family', 'Consolas,Menlo,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New,monospace,sans-serif');
+            $('#inputfonticon').text('Input Font: Default');
+        }
+    }
 }
 
 if (localStorage.getItem("writing") !== null) {
@@ -238,6 +322,14 @@ $('#patternicon').click(function() {
     patternenabled = !patternenabled;
     localStorage.setItem("pattern", patternenabled ? "1" : "0");
     togglepattern(patternenabled);
+});
+
+$('#fonticon').click(function() {
+    togglefont();
+});
+
+$('#inputfonticon').click(function() {
+    toggleinputfont();
 });
 
 $('#wmd-input').on('input', function() {
@@ -359,6 +451,16 @@ $(document).on('keydown', function(e) {
         e.preventDefault();
         return false;
     }
+    else if (e.keyCode == 70 && (e.ctrlKey || e.metaKey) && e.shiftKey) {    // CTRL + SHIFT + F
+        togglefont();
+        e.preventDefault();
+        return false;
+    }
+    else if (e.keyCode == 73 && (e.ctrlKey || e.metaKey) && e.shiftKey) {    // CTRL + SHIFT + I
+        toggleinputfont();
+        e.preventDefault();
+        return false;
+    }
     else if (e.keyCode == 27)  { // ESC
         $('#help').hide();
     }
@@ -369,6 +471,10 @@ var latexenabledonce = false;
 var latexenabled = localStorage.getItem("latex") !== "0";
 var darkmodeenabled = localStorage.getItem("darkmode");
 var patternenabled = localStorage.getItem("pattern") === "1";
+var fontmode = parseInt(localStorage.getItem("fontmode")) || 0;
+var inputfontmode = parseInt(localStorage.getItem("inputfontmode")) || 0;
+var customfont = localStorage.getItem("customfont");
+var custominputfont = localStorage.getItem("custominputfont");
 if (darkmodeenabled === null) {
     darkmodeenabled = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
 } else {
@@ -381,10 +487,22 @@ var mjpd1 = new mjpd();
 togglemathjax(latexenabled);
 toggledarkmode(darkmodeenabled);
 togglepattern(patternenabled);
+if (customfont) {
+    $('head').append('<link href="https://fonts.googleapis.com/css2?family=' + encodeURIComponent(customfont) + '&display=swap" rel="stylesheet">');
+}
+if (custominputfont) {
+    $('head').append('<link href="https://fonts.googleapis.com/css2?family=' + encodeURIComponent(custominputfont) + '&display=swap" rel="stylesheet">');
+}
+for (var i = 0; i < fontmode; i++) togglefont(); // set to the saved mode
+for (var i = 0; i < inputfontmode; i++) toggleinputfont(); // set to the saved mode
+$('#customfontinput').val(customfont || '');
+$('#custominputfontinput').val(custominputfont || '');
 editor.run();
 </script>
     
+<!--
 <script async src="https://www.googletagmanager.com/gtag/js?id=UA-2312083-14"></script><script>window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'UA-2312083-14');</script>
+-->
     
 </body>
 </html>
