@@ -57,14 +57,15 @@ html { font-family: sans-serif; }
 #wmd-preview table tr:nth-child(2n) { background-color: #f8f8f8; }
 #wmd-preview a { text-decoration: none; color: #07c; }
 #wmd-preview .pagebreak { border-bottom: 1px dashed #eee; padding-top: 20px; margin-bottom: 30px; }
-#helpicon { position: absolute; bottom: 0; left: 0; margin: 5px; color: #ccc; cursor: pointer; font-family: sans-serif;  font-size: 15px; }
-#darkmodeicon { margin: 5px; color: #ccc; cursor: pointer; font-family: sans-serif; font-size: 15px; font-weight: bold; }
-#patternicon { margin: 5px; color: #ccc; cursor: pointer; font-family: sans-serif; font-size: 15px; font-weight: bold; }
-#fonticon { margin: 5px; color: #ccc; cursor: pointer; font-family: sans-serif; font-size: 15px; font-weight: bold; }
-#inputfonticon { margin: 5px; color: #ccc; cursor: pointer; font-family: sans-serif; font-size: 15px; font-weight: bold; }
+#helpicon { position: absolute; bottom: 0; left: 0; margin: 5px; cursor: pointer; }
+#darkmodeicon { margin: 5px; cursor: pointer; }
+#patternicon { margin: 5px; cursor: pointer; }
+#fonticon { margin: 5px; cursor: pointer; }
+#inputfonticon { margin: 5px; cursor: pointer; }
+#invertTableIcon { margin: 5px; cursor: pointer; }
 #help { display: none; position: fixed; top: 10%; height: 70%; left: 25%; max-width: 50%; overflow: hidden; background-color: white; border: 1px solid #ccc; padding: 15px 30px 20px 30px; overflow-y: auto; }
 #help pre {  word-wrap: break-word !important; white-space: pre-wrap !important; }
-#closeicon { position: fixed; top: 10%; left: 25%; margin: 5px 8px; color: #ccc; cursor: pointer; font-family: sans-serif; }
+#closeicon { position: fixed; top: 10%; left: 25%; margin: 5px 8px; cursor: pointer; }
 #openFileInput { position: absolute; display: none; }
 
 @media print { 
@@ -126,6 +127,7 @@ html { font-family: sans-serif; }
 <div id="patternicon" class="unselectable">Toggle Pattern On</div>
 <div id="fonticon" class="unselectable">Font: Sans</div>
 <div id="inputfonticon" class="unselectable">Input Font: Default</div>
+<div id="invertTableIcon" class="unselectable">Invert Table</div>
 <div style="margin: 5px; color: #ccc; font-family: sans-serif; font-size: 15px;">
 Custom Font: <input id="customfontinput" type="text" placeholder="e.g., Open Sans" style="background: transparent; border: 1px solid #ccc; color: #ccc; padding: 2px;">
 </div>
@@ -348,6 +350,10 @@ $('#darkmodeicon').click(function() {
     toggledarkmode(darkmodeenabled);
 });
 
+$('#invertTableIcon').click(function() {
+    $('#wmd-tableinvert-button').click();
+});
+
 $('#closeicon, #wmd-input, #wmd-preview').click(function() {
     $('#help').hide();
 });
@@ -431,7 +437,8 @@ $(document).on('keydown', function(e) {
         $('html').toggleClass('texroman');
         e.preventDefault();
         return false;
-    }    
+    }
+
     else if (e.keyCode == 76 && (e.ctrlKey || e.metaKey) && e.shiftKey) {    // CTRL + SHIFT + L 
         latexenabled = !latexenabled;
         localStorage.setItem("latex", latexenabled ? "1" : "0");

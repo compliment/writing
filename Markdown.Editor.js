@@ -1,8 +1,98 @@
-﻿//modification JB: CTRL+L + CTRL+U disabled: //doClick(buttons.link);  doClick(buttons.ulist);
+//modification JB: CTRL+L + CTRL+U disabled: //doClick(buttons.link);  doClick(buttons.ulist);
 
 // needs Markdown.Converter.js at the moment
 
 (function () {
+
+    function invertMarkdownTable(markdown) {
+        markdown = markdown.trim();
+        if (!markdown) return markdown;
+        var originalLines = markdown.split('\n');
+        var hasLeadingPipe = originalLines.some(line => /^\s*\|/.test(line));
+        var lines = originalLines.map(function (line) {
+            return line.replace(/^\s*\|/, '').replace(/\|\s*$/, '').split('|').map(trim);
+        });
+        var maxColumn = 0;
+        lines.forEach(function (line) {
+            maxColumn = Math.max(maxColumn, line.length);
+        });
+        // Assume the second line is separator if it matches table separator
+        var alignments = [];
+        if (lines.length >= 2 && lines[1].every(cell => /^:*-+:*$/.test(cell.trim()))) {
+            var separators = lines[1];
+            alignments = separators.map(cell => {
+                var c = cell.trim();
+                if (c.startsWith(':') && c.endsWith(':')) return 'center';
+                else if (c.endsWith(':')) return 'right';
+                else return 'left';
+            });
+            lines.splice(1, 1);
+        }
+        // Transpose
+        var revertedLines = [];
+        for (var i = 0; i < maxColumn; i++) {
+            var row = [];
+            for (var j = 0; j < lines.length; j++) {
+                row.push(lines[j][i] || '');
+            }
+            revertedLines.push(row);
+        }
+        // Calculate max lengths
+        var maxLengths = new Array(maxColumn).fill(0);
+        revertedLines.forEach(function (row) {
+            row.forEach(function (cell, i) {
+                maxLengths[i] = Math.max(maxLengths[i], wordLength(cell));
+            });
+        });
+        // Add separator
+        var sepLine = alignments.length ? alignments.map(a => {
+            if (a === 'center') return ':---:';
+            else if (a === 'right') return '---:';
+            else return '---';
+        }) : new Array(maxColumn).fill('---');
+        revertedLines.splice(1, 0, sepLine);
+        // Pad and join
+        var result = revertedLines.map(function (row) {
+            return row.map(function (cell, i) {
+                return pad(cell, maxLengths[i]);
+            }).join(' | ');
+        }).join('\n');
+        if (hasLeadingPipe) {
+            result = result.split('\n').map(line => '| ' + line).join('\n');
+        }
+        return result;
+    }
+
+    function wordLength(word) {
+        return Array.prototype.reduce.call(word, function (prev, char) {
+            return prev + characterLength(char);
+        }, 0);
+    }
+
+    function characterLength(char) {
+        if (/[\u4E00-\u9FA5]/.test(char)) {
+            return 2;
+        }
+        if (/[\uFE30-\uFFA0]/.test(char)) {
+            return 2;
+        }
+        return 1;
+    }
+
+    function pad(word, len) {
+        var spaces = len - wordLength(word);
+        return word + ' '.repeat(spaces);
+    }
+
+    function trim(word) {
+        return word.trim();
+    }
+
+    function array(val, n) {
+        var ret = [];
+        while (n--) ret.push(val);
+        return ret;
+    }
 
     var util = {},
         position = {},
@@ -48,6 +138,8 @@
         headingexample: "Heading",
 
         hr: "Horizontal Rule <hr> Ctrl+R",
+
+        tableinvert: "Invert Table Ctrl+.",
 
         undo: "Undo - Ctrl+Z",
         redo: "Redo - Ctrl+Y",
@@ -1278,18 +1370,19 @@
                             doClick(buttons.undo);
                         }
                         break;
-                    default:
-                        return;
-                }
+                     default:
+                         return;
+                 }
 
 
-                if (key.preventDefault) {
-                    key.preventDefault();
-                }
 
-                if (window.event) {
-                    window.event.returnValue = false;
-                }
+                 if (key.preventDefault) {
+                     key.preventDefault();
+                 }
+
+                 if (window.event) {
+                     window.event.returnValue = false;
+                 }
             }
         });
 
@@ -1486,15 +1579,16 @@
             }));
             buttons.heading = makeButton("wmd-heading-button", getString("heading"), "-160px", bindCommand("doHeading"));
             buttons.hr = makeButton("wmd-hr-button", getString("hr"), "-180px", bindCommand("doHorizontalRule"));
+            buttons.tableinvert = makeButton("wmd-tableinvert-button", getString("tableinvert"), "-200px", bindCommand("doInvertTable"));
             makeSpacer(3);
-            buttons.undo = makeButton("wmd-undo-button", getString("undo"), "-200px", null);
-            buttons.undo.execute = function (manager) { if (manager) manager.undo(); };
+            buttons.undo = makeButton("wmd-undo-button", getString("undo"), "-220px", null);
+             buttons.undo.execute = function (manager) { if (manager) manager.undo(); };
 
-            var redoTitle = /win/.test(nav.platform.toLowerCase()) ?
-                getString("redo") :
-                getString("redomac"); // mac and other non-Windows platforms
+             var redoTitle = /win/.test(nav.platform.toLowerCase()) ?
+                 getString("redo") :
+                 getString("redomac"); // mac and other non-Windows platforms
 
-            buttons.redo = makeButton("wmd-redo-button", redoTitle, "-220px", null);
+             buttons.redo = makeButton("wmd-redo-button", redoTitle, "-240px", null);
             buttons.redo.execute = function (manager) { if (manager) manager.redo(); };
 
             if (helpOptions) {
@@ -1503,7 +1597,7 @@
                 helpButton.appendChild(helpButtonImage);
                 helpButton.className = "wmd-button wmd-help-button";
                 helpButton.id = "wmd-help-button" + postfix;
-                helpButton.XShift = "-240px";
+                helpButton.XShift = "-260px";
                 helpButton.isHelp = true;
                 helpButton.style.right = "0px";
                 helpButton.title = getString("help");
@@ -1565,6 +1659,12 @@
 
     commandProto.doItalic = function (chunk, postProcessing) {
         return this.doBorI(chunk, postProcessing, 1, this.getString("italicexample"));
+    };
+
+    commandProto.doInvertTable = function (chunk, postProcessing) {
+        chunk.trimWhitespace();
+        chunk.selection = invertMarkdownTable(chunk.selection);
+        return chunk;
     };
 
     // chunk: The selected region that will be enclosed with */**
