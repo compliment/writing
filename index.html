@@ -55,6 +55,7 @@ html { font-family: sans-serif; }
 #wmd-preview .pagebreak { border-bottom: 1px dashed #eee; padding-top: 20px; margin-bottom: 30px; }
 #helpicon { position: absolute; bottom: 0; left: 0; margin: 5px; color: #ccc; cursor: pointer; font-family: sans-serif;  font-size: 15px; }
 #darkmodeicon { margin: 5px; color: #ccc; cursor: pointer; font-family: sans-serif; font-size: 15px; font-weight: bold; }
+#patternicon { margin: 5px; color: #ccc; cursor: pointer; font-family: sans-serif; font-size: 15px; font-weight: bold; }
 #help { display: none; position: fixed; top: 10%; height: 70%; left: 25%; max-width: 50%; overflow: hidden; background-color: white; border: 1px solid #ccc; padding: 15px 30px 20px 30px; overflow-y: auto; }
 #help pre {  word-wrap: break-word !important; white-space: pre-wrap !important; }
 #closeicon { position: fixed; top: 10%; left: 25%; margin: 5px 8px; color: #ccc; cursor: pointer; font-family: sans-serif; }
@@ -74,6 +75,25 @@ html { font-family: sans-serif; }
 .dark-mode .wmd-prompt-dialog { background-color: #424242; color: #FAFAFA; }
 .dark-mode .wmd-prompt-dialog input { background-color: #212121; color: #FAFAFA; }
 .dark-mode #wmd-preview blockquote { background-color: #00796B; border-color: #004D40; }
+
+.diagonal-pattern #wmd-input, .diagonal-pattern #wmd-preview {
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 10px,
+    rgba(0,0,0,0.05) 10px,
+    rgba(0,0,0,0.05) 11px
+  );
+}
+.dark-mode.diagonal-pattern #wmd-input, .dark-mode.diagonal-pattern #wmd-preview {
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 10px,
+    rgba(255,255,255,0.1) 10px,
+    rgba(255,255,255,0.1) 11px
+  );
+}
 
 </style>
 
@@ -96,7 +116,8 @@ html { font-family: sans-serif; }
 <div id="helpicon" class="unselectable">?</div>
 <div id="help">
 <div id="closeicon" class="unselectable">X</div>
-<div id="darkmodeicon" class="unselectable">🌙 Toggle Dark Mode</div>
+<div id="darkmodeicon" class="unselectable">Toggle Dark Mode</div>
+<div id="patternicon" class="unselectable">Toggle Pattern On</div>
 <pre>
 <a href="https://github.com/josephernest/writing">Writing</a> is a lightweight distraction-free text editor.
 Write text on the left, and the result is displayed on the right.
@@ -110,6 +131,7 @@ CTRL + SHIFT + O: open .MD file
 
 CTRL + SHIFT + L: enable / disable LaTeX (i.e. math formulas)
 CTRL + SHIFT + D: toggle dark mode
+CTRL + SHIFT + P: toggle diagonal line pattern background
 CTRL + SHIFT + R: toggle roman (LaTex-like) or sans-serif font
 CTRL + SHIFT + H: show this help dialog
 
@@ -173,7 +195,12 @@ togglemathjax = function(enabled) {
 
 toggledarkmode = function(enabled){
     $('body').toggleClass('dark-mode',enabled);
-    $('#darkmodeicon').text(enabled ? '☀️ Toggle Light Mode' : '🌙 Toggle Dark Mode');
+    $('#darkmodeicon').text(enabled ? 'Toggle Light Mode' : 'Toggle Dark Mode');
+}
+
+togglepattern = function(enabled){
+    $('body').toggleClass('diagonal-pattern',enabled);
+    $('#patternicon').text(enabled ? 'Toggle Pattern Off' : 'Toggle Pattern On');
 }
 
 if (localStorage.getItem("writing") !== null) {
@@ -205,6 +232,12 @@ $('body').on('drag dragstart dragend dragover dragenter dragleave drop', functio
   })
   .on('drop', function(e) {
     readFile(e.originalEvent.dataTransfer.files[0]);
+});
+
+$('#patternicon').click(function() {
+    patternenabled = !patternenabled;
+    localStorage.setItem("pattern", patternenabled ? "1" : "0");
+    togglepattern(patternenabled);
 });
 
 $('#wmd-input').on('input', function() {
@@ -318,7 +351,14 @@ $(document).on('keydown', function(e) {
         $('#openFileInput').click();
         e.preventDefault();
         return false;
-    } 
+    }
+    else if (e.keyCode == 80 && (e.ctrlKey || e.metaKey) && e.shiftKey) {    // CTRL + SHIFT + P
+        patternenabled = !patternenabled;
+        localStorage.setItem("pattern", patternenabled ? "1" : "0");
+        togglepattern(patternenabled);
+        e.preventDefault();
+        return false;
+    }
     else if (e.keyCode == 27)  { // ESC
         $('#help').hide();
     }
@@ -328,6 +368,7 @@ var mode = 0;
 var latexenabledonce = false;
 var latexenabled = localStorage.getItem("latex") !== "0";
 var darkmodeenabled = localStorage.getItem("darkmode");
+var patternenabled = localStorage.getItem("pattern") === "1";
 if (darkmodeenabled === null) {
     darkmodeenabled = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
 } else {
@@ -339,6 +380,7 @@ var editor = new Markdown.Editor(converter, '');
 var mjpd1 = new mjpd();
 togglemathjax(latexenabled);
 toggledarkmode(darkmodeenabled);
+togglepattern(patternenabled);
 editor.run();
 </script>
     
